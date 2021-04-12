@@ -1,0 +1,188 @@
+{\bfseries{Notice\+:}} Running the A\+WS IoT Device Client will incur usage of A\+WS IoT services, and is likely to incur charges on your A\+WS account. Please refer the pricing pages for \href{https://aws.amazon.com/iot-core/pricing/}{\texttt{ A\+WS IoT Core}}, \href{https://aws.amazon.com/iot-device-management/pricing/}{\texttt{ A\+WS IoT Device Management}}, and \href{https://aws.amazon.com/iot-device-defender/pricing/}{\texttt{ A\+WS IoT Device Defender}} for more details.
+
+
+\begin{DoxyItemize}
+\item \href{\#jobs-feature}{\texttt{ Jobs Feature}}
+\begin{DoxyItemize}
+\item \href{\#sample-jobs}{\texttt{ Sample Jobs}}
+\item \href{\#creating-a-job}{\texttt{ Creating a Job}}
+\item \href{\#creating-your-own-job-handler}{\texttt{ Creating your own Job Handler}}
+\begin{DoxyItemize}
+\item \href{\#jobjob-handler-security-considerations}{\texttt{ Job/\+Job Handler Security Considerations}}
+\end{DoxyItemize}
+\item \href{\#debugging-your-job}{\texttt{ Debugging your Job}}
+\item \href{\#jobs-build-flags}{\texttt{ Jobs Build Flags}}
+\item \href{\#jobs-feature-configuration-options}{\texttt{ Jobs Feature Configuration Options}}
+\begin{DoxyItemize}
+\item \href{\#configuring-the-jobs-feature-via-the-command-line}{\texttt{ Configuring the Jobs feature via the command line}}
+\item \href{\#configuring-the-jobs-feature-via-the-json-configuration-file}{\texttt{ Configuring the Jobs feature via the J\+S\+ON configuration file}}
+\end{DoxyItemize}
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+../../\+R\+E\+A\+D\+ME.md \char`\"{}$\ast$\+Back To The Main Readme$\ast$\char`\"{}\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md20}{}\doxysection{Jobs Feature}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md20}
+The Jobs feature within the A\+WS IoT Device Client provides device-\/side functionality for execution of \href{https://docs.aws.amazon.com/iot/latest/developerguide/iot-jobs.html}{\texttt{ jobs created}}. When the Jobs feature starts within the A\+WS IoT Device Client, the feature will attempt to establish subscriptions to important notification topics, and will also publish a request to receive the latest pending jobs. It will use the shared M\+Q\+TT connection to subscribe/publish to these topics.
+
+When a new Job is received via these topics, the Jobs feature will look for and extract the following required and optional elements\+:\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md21}{}\doxysubsection{Sample Jobs}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md21}
+Existing \href{../../sample-job-docs}{\texttt{ Sample Job Docs}} Existing \href{../../sample-job-handlers}{\texttt{ Sample Job Handlers}}\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md22}{}\doxysubsection{Creating a Job}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md22}
+\href{../../sample-job-docs/install-packages.json}{\texttt{ View a sample job document here}}
+
+The following fields are extracted from the incoming Job document by the Jobs feature within the A\+WS IoT Device Client when a job is received.
+
+{\ttfamily operation} {\itshape string} (Required)\+: This is the executable or script that you\textquotesingle{}d like to run. Here we can specify a script located in the Device Client\textquotesingle{}s handler directory, such as {\ttfamily install-\/packages.\+sh}, or it could be a well known executable binary in the Device Client\textquotesingle{}s environmentx path, such as {\ttfamily echo} or {\ttfamily apt-\/get}.
+
+{\ttfamily args} {\itshape string array} (Optional)\+: This is a J\+S\+ON array of string arguments which will be passed to the specified operation. For example, if we want to run our {\ttfamily install-\/packages.\+sh} to install the package {\ttfamily ifupdown}, our args field would look like\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{...}
+\DoxyCodeLine{"args": ["ifupdown"],}
+\DoxyCodeLine{...}
+\end{DoxyCode}
+
+
+If we wanted our remote device to print out \char`\"{}\+Hello World\char`\"{}, then our job document so far might look like\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{    "operation": "echo",}
+\DoxyCodeLine{    "args": ["Hello world!"]}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+
+
+{\ttfamily path} {\itshape string} (Optional)\+: This field tells the Jobs feature where it should look to find an executable that matches the specified operation. If this field is omitted, the Jobs feature will assume that the executable can be found in the {\ttfamily P\+A\+TH} environment variable. If you expect that the executable (operation) should be found in the Job feature\textquotesingle{}s handler directory ($\sim$/.aws-\/iot-\/device-\/client/jobs by default or specified via command line/json configuration values), then the path must be specified as part of the job document as follows\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{...}
+\DoxyCodeLine{"path": "default",}
+\DoxyCodeLine{...}
+\end{DoxyCode}
+
+
+The path could also be specified as a particular directory that is expected on the device, such as\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{...}
+\DoxyCodeLine{"path": "/home/ubuntu/my-\/job-\/handler-\/folder"}
+\DoxyCodeLine{...}
+\end{DoxyCode}
+
+
+{\ttfamily include\+Std\+Out} {\itshape boolean} (Optional)\+: This field tells the Jobs feature whether the standard output (S\+T\+D\+O\+UT) of the child process should be included in the job execution update that is published to the IoT Jobs service. For example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{...}
+\DoxyCodeLine{"includeStdOut": true,}
+\DoxyCodeLine{...}
+\end{DoxyCode}
+
+
+{\ttfamily allow\+Std\+Err} {\itshape integer} (Optional)\+: This field tells the Jobs feature whether a specific number of lines of output on S\+T\+D\+E\+RR from the job handler may be acceptable. If this field is omitted, the Jobs feature will use a default of 0 (zero), meaning that any lines of output on S\+T\+D\+E\+RR will cause the job to be marked as failed. For example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{...}
+\DoxyCodeLine{"allowStdErr": 2,}
+\DoxyCodeLine{...}
+\end{DoxyCode}
+
+
+This job document indicates that the Jobs feature will mark the job as a success if the return code of the process is 0 A\+ND there are fewer than or equal to 2 (two) lines of standard error output from the job handler.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md23}{}\doxysubsection{Creating your own Job Handler}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md23}
+The Jobs feature within the A\+WS IoT Device Client handles establishing and maintaining a connection to A\+WS IoT Core and making sure that jobs are delivered to your device, but Job handlers represent the actual business logic that you want to execute on your device.
+
+For example, we might want to create a new application written in Python called \char`\"{}foo\char`\"{} that should be run whenever our device receives a \char`\"{}foo\char`\"{} job. After writing the foo application, which for this particular example might only consist of a single file called {\ttfamily Foo.\+py}, here\textquotesingle{}s the steps that we would need to go through to set our A\+WS IoT Device Client to automatically trigger foo\+:
+
+
+\begin{DoxyEnumerate}
+\item Add {\ttfamily Foo.\+py} to our Job Handler Directory\+: By default, the Jobs feature will look at {\ttfamily $\sim$/.aws-\/iot-\/device-\/client/jobs/} for a handler, so we should put {\ttfamily Foo.\+py} here (where {\ttfamily $\sim$/} represents the home directory of the user that will run the Device Client -\/ {\ttfamily /root} if we\textquotesingle{}re running the A\+WS IoT Device Client as a service, or {\ttfamily /home/ubuntu/} if we\textquotesingle{}re running under the default Ubuntu user). The new path then looks something like {\ttfamily /home/ubuntu/.aws-\/iot-\/device-\/client/jobs/\+Foo.\+py}.
+\item Set Foo\textquotesingle{}s file permissions\+: All job handlers that we place in the A\+WS IoT Device Client\textquotesingle{}s handler directory need to have permissions of {\ttfamily 700}, meaning the user that owns it has read, write, and execute permissions while all other users do not have any permissions for this file. You can typically set these permissions correctly with {\ttfamily chmod 700 Foo.\+py} on most linux systems.
+\item Make sure the A\+WS IoT Device Client is running\+: If the A\+WS IoT Device Client is already running, you can skip this step since the A\+WS IoT Device Client will dynamically load your Job handle when it receives a corresponding job. If it\textquotesingle{}s not running, you can start the client as the current user by running {\ttfamily ./aws-\/iot-\/device-\/client}, or if you\textquotesingle{}ve already installed the client as a service, you can probably run something similar to {\ttfamily sudo systemctl start aws-\/iot-\/device-\/client.\+service}
+\item Create a Job targeting your thing\+: Now that the A\+WS IoT Device Client is running on our device, we can create a job either through the A\+WS Console or through the A\+WS C\+LI. For example, here\textquotesingle{}s how we might create a job targeting a device on the command line\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{aws iot create-\/job -\/-\/job-\/id run-\/foo -\/-\/document "\{\(\backslash\)"operation\(\backslash\)": \(\backslash\)"Foo.py\(\backslash\)", \(\backslash\)"path\(\backslash\)": \(\backslash\)"default\(\backslash\)"\}" -\/-\/targets arn:aws:iot:us-\/west-\/2:XXXXXXXXXX:thing/my-\/thing}
+\end{DoxyCode}
+
+\end{DoxyEnumerate}
+
+After creating this job, a notification will be sent from the A\+WS IoT Core endpoint via M\+Q\+TT to the A\+WS IoT Device Client running on your target thing. The Device Client will automatically invoke Foo.\+py and will update the job execution status once Foo.\+py returns.
+
+For more examples of how a Job handler can be implemented, check out the sample job handlers within this package under the {\ttfamily sample-\/job-\/handlers} directory.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md24}{}\doxysubsubsection{Job/\+Job Handler Security Considerations}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md24}
+When creating a job, it\textquotesingle{}s critically important that you consider the risks associated with executing particular commands on the device. For example, running a job that prints the contents of secure credentials to S\+T\+D\+O\+UT or S\+T\+D\+E\+RR will cause these contents to enter the A\+WS IoT Device Client logs, and may run the risk of exposing these credentials to an attacker if the logs are not properly secured.
+
+We recommend avoiding execution of any jobs that may reveal or leak sensitive information such as credentials , private keys, or sensitive files as well as assignment of appropriately restrictive permissions for your credentials /sensitive files.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md25}{}\doxysubsection{Debugging your Job}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md25}
+Once you\textquotesingle{}ve set up your job handlers and started targeting your thing or thing group with jobs, you may need to perform a diagnosis in the event that your job fails. The Jobs feature within the A\+WS IoT Device Client automatically publishes the last {\ttfamily 1024} characters (this is a maximum limit enforced by the Jobs service) of your job process\textquotesingle{}s standard error output as part of the job execution update. To view the standard error (S\+T\+D\+E\+RR) output from your device, use the A\+WS C\+LI as shown in the example below to describe the job execution. The S\+T\+D\+E\+RR output is shown in the response body as part of the status details in a field labeled \textquotesingle{}stderr\textquotesingle{}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{aws iot describe-\/job-\/execution -\/-\/region us-\/west-\/2 -\/-\/job-\/id 7ff399d0-\/87f7-\/rebootstage0-\/reboot-\/setup -\/-\/thing-\/name my-\/test-\/thing}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{    "execution": \{}
+\DoxyCodeLine{        "jobId": "7ff399d0-\/87f7-\/rebootstage0-\/reboot-\/setup",}
+\DoxyCodeLine{        "status": "FAILED",}
+\DoxyCodeLine{        "statusDetails": \{}
+\DoxyCodeLine{            "detailsMap": \{}
+\DoxyCodeLine{                "reason": "Exited with status: 1",}
+\DoxyCodeLine{                "stderr": "mv: cannot stat '/sbin/reboot-\/invalid': No such file or directory\(\backslash\)n"}
+\DoxyCodeLine{            \}}
+\DoxyCodeLine{        \},}
+\DoxyCodeLine{        "thingArn": "arn:aws:iot:us-\/west-\/2:XXXXXXXXXX:thing/my-\/test-\/thing",}
+\DoxyCodeLine{        "queuedAt": "2020-\/12-\/02T14:48:38.705000-\/08:00",}
+\DoxyCodeLine{        "startedAt": "2020-\/12-\/02T16:15:11.677000-\/08:00",}
+\DoxyCodeLine{        "lastUpdatedAt": "2020-\/12-\/02T16:15:11.677000-\/08:00",}
+\DoxyCodeLine{        "executionNumber": 1,}
+\DoxyCodeLine{        "versionNumber": 2}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+
+
+If the S\+T\+D\+E\+RR output alone is insufficient, we recommend setting the {\ttfamily include\+Std\+Out} flag to true within your Job document. By setting this flag to true, the Jobs feature within the A\+WS IoT Device Client will publish the last {\ttfamily 1024} characters of standard output (S\+T\+D\+O\+UT) as part of the job execution update to assist with debugging. Below is an example of how to add this to your job document\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{...}
+\DoxyCodeLine{"includeStdOut": true,}
+\DoxyCodeLine{...}
+\end{DoxyCode}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md26}{}\doxysubsection{Jobs Build Flags}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md26}
+{\ttfamily -\/D\+E\+X\+C\+L\+U\+D\+E\+\_\+\+J\+O\+BS}\+: If this flag is set to ON, symbols related to the Jobs feature will not be included in the output binary. If this flag is not included, the Jobs feature will be included in the output binary.
+
+Example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cmake ../ -\/DEXCLUDE\_JOBS=ON}
+\end{DoxyCode}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md27}{}\doxysubsection{Jobs Feature Configuration Options}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md27}
+{\ttfamily enabled}\+: Whether or not the jobs feature is enabled (True/\+False).
+
+{\ttfamily handler-\/directory}\+: A path to a directory containing scripts or executables that the Jobs feature should look in when receiving an incoming job. If there is a script or executable in the directory that matches the name of the operation passed as part of the incoming job document, the Job feature will automatically execute it and will update the job based on the performance of the specified executable. This directory should have permissions of {\ttfamily 700}, and any script/executable in this directory should have permissions of {\ttfamily 700}. If these permissions are not found, the Jobs feature will not execute the scripts or executables in this directory.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md28}{}\doxysubsubsection{Configuring the Jobs feature via the command line}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md28}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./aws-\/iot-\/device-\/client -\/-\/enable-\/jobs [true|false] -\/-\/jobs-\/handler-\/dir [your/path/to/job/handler/directory/]}
+\end{DoxyCode}
+
+
+Example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./aws-\/iot-\/device-\/client -\/-\/enable-\/jobs true -\/-\/jobs-\/handler-\/dir \string~/.aws-\/iot-\/device-\/client/jobs/}
+\end{DoxyCode}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md29}{}\doxysubsubsection{Configuring the Jobs feature via the J\+S\+O\+N configuration file}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_jobs__r_e_a_d_m_e_autotoc_md29}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{    ...}
+\DoxyCodeLine{    "jobs": \{}
+\DoxyCodeLine{        "enabled": [true|false],}
+\DoxyCodeLine{        "handler-\/directory": "[your/path/to/job/handler/directory/]"}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{    ...}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+
+
+Example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{    ...}
+\DoxyCodeLine{    "jobs": \{}
+\DoxyCodeLine{        "enabled": true,}
+\DoxyCodeLine{        "handler-\/directory": "\string~/.aws-\/iot-\/device-\/client/jobs/"}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{    ...}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+
+
+\href{\#jobs}{\texttt{ {\itshape Back To The Top}}} 

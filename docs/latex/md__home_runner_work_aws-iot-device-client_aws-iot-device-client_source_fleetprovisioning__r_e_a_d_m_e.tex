@@ -1,0 +1,235 @@
+{\bfseries{Notice\+:}} Running the A\+WS IoT Device Client will incur usage of A\+WS IoT services, and is likely to incur charges on your A\+WS account. Please refer the pricing pages for \href{https://aws.amazon.com/iot-core/pricing/}{\texttt{ A\+WS IoT Core}}, \href{https://aws.amazon.com/iot-device-management/pricing/}{\texttt{ A\+WS IoT Device Management}}, and \href{https://aws.amazon.com/iot-device-defender/pricing/}{\texttt{ A\+WS IoT Device Defender}} for more details.
+
+
+\begin{DoxyItemize}
+\item \href{\#fleet-provisioning-feature}{\texttt{ Fleet Provisioning Feature}}
+\begin{DoxyItemize}
+\item \href{\#resources-required-for-fleet-provisioning-feature}{\texttt{ Resources required for Fleet Provisioning feature}}
+\item \href{\#sample-claim-certificate-policy}{\texttt{ Sample Claim Certificate Policy}}
+\begin{DoxyItemize}
+\item \href{\#sample-policy}{\texttt{ Sample Policy}}
+\end{DoxyItemize}
+\item \href{\#sample-fleet-provisioning-template}{\texttt{ Sample Fleet Provisioning Template}}
+\begin{DoxyItemize}
+\item \href{\#sample-template}{\texttt{ Sample Template}}
+\end{DoxyItemize}
+\item \href{\#sample-permanent-certificate-policy}{\texttt{ Sample Permanent Certificate Policy}}
+\begin{DoxyItemize}
+\item \href{\#sample-fpcertpolicy-policy}{\texttt{ Sample (F\+P\+Cert\+Policy) Policy}}
+\end{DoxyItemize}
+\item \href{\#fleet-provisioning-runtime-configuration-file}{\texttt{ Fleet Provisioning Runtime Configuration File}}
+\begin{DoxyItemize}
+\item \href{\#example-fleet-provisioning-runtime-configuration-file}{\texttt{ Example Fleet Provisioning Runtime Configuration File}}
+\end{DoxyItemize}
+\item \href{\#fleet-provisioning-feature-configuration-options}{\texttt{ Fleet Provisioning Feature Configuration Options}}
+\begin{DoxyItemize}
+\item \href{\#configuring-the-fleet-provisioning-feature-via-the-command-line}{\texttt{ Configuring the Fleet Provisioning feature via the command line}}
+\item \href{\#configuring-the-fleet-provisioning-feature-via-the-json-configuration-file}{\texttt{ Configuring the Fleet Provisioning feature via the J\+S\+ON configuration file}}
+\end{DoxyItemize}
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+../../\+R\+E\+A\+D\+ME.md \char`\"{}$\ast$\+Back To The Main Readme$\ast$\char`\"{}\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md6}{}\doxysection{Fleet Provisioning Feature}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md6}
+The A\+WS IoT Device Client has the capability to provision your IoT device when you connect it to A\+WS IoT Core for the first time. The device client provides two different mechanisms for provisioning your device (1) using a claim certificate and private key and (2) using a C\+SR file (along with claim certificate and key) to securely provision the device while keeping the user private key secure. After all required information is provided, the Fleet Provisioning Feature will provision, register the device with A\+WS IoT Core, and then establish a connection to IoT Core that is ready for use by other Device Client features.
+
+When the A\+WS IoT Device Client\textquotesingle{}s Fleet Provisioning feature is enabled and provisions the device for the first time, it will first create a permanent certificate, private key (if required), and will then attach a policy to the certificate in IoT Core which will provide the device with the permissions required to run other Device Client features such as Jobs, Secure Tunneling, and Device Defender. Once these resources are created correctly, Fleet Provisioning feature will then create and register the thing/device with A\+WS IoT Core which will complete the provision process for the device.
+
+More details about A\+WS IoT Fleet Provisioning by claim can be found \href{https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html}{\texttt{ here}}.
+
+{\itshape Note\+: If the fleet provisioning feature fails to provision the new key, certificate or thing/device, the device client will abort with fatal error.}
+
+{\itshape Note\+: If the C\+SR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device}
+
+{\itshape Note\+: Please make sure that the Claim certificate, private key, C\+SR file and/or device private key stored on device side have respective permissions applied to it as mentioned above in the \char`\"{}\+File and Directory Permissions\char`\"{} section of the readme.}
+
+Refer to the \href{https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html\#create-keys-cert}{\texttt{ Create\+Keys\+And\+Certificate}} and \href{https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html\#create-cert-csr}{\texttt{ Create\+Certificate\+From\+Csr}} A\+P\+Is for more details.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md7}{}\doxysubsection{Resources required for Fleet Provisioning feature}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md7}
+The A\+WS IoT Device Client\textquotesingle{}s Fleet Provisioning feature will require the following resources for provisioning the device. The Claim Certificate and Private Key will be used to create a secure M\+Q\+TT connection between Device Client and A\+WS IoT Core. A C\+SR file is only required if you want to use the \href{https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html\#create-cert-csr}{\texttt{ Create\+Certificate\+From\+Csr}} A\+PI for creating a permanent certificate.
+
+
+\begin{DoxyItemize}
+\item Claim Certificate
+\item Private Key
+\item C\+SR File (Required for creating certificate using \href{https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html\#create-cert-csr}{\texttt{ Create\+Certificate\+From\+Csr}} A\+PI)
+\item Device Private Key (Required for provisioning using C\+SR file)
+\item Fleet Provisioning Template
+\end{DoxyItemize}\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md8}{}\doxysubsection{Sample Claim Certificate Policy}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md8}
+Claim Certificate policy will allow the Device Client to use the claim certificate to securely connect to A\+WS IoT Core and provision the device. Please note, the Claim certificate policy example provided below restricts the Device Client to only provision the device; it does not enable the Device Client to interact with any other cloud side features apart from Fleet Provisioning.
+
+You can navigate to the {\itshape A\+WS IoT console -\/$>$ Secure -\/$>$ Policies} to create and attach a policy to the claim certificate.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md9}{}\doxyparagraph{Sample Policy}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md9}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{  "Version": "2012-\/10-\/17",}
+\DoxyCodeLine{  "Statement": [}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{      "Effect": "Allow",}
+\DoxyCodeLine{      "Action": "iot:Connect",}
+\DoxyCodeLine{      "Resource": "arn:aws:iot:us-\/east-\/1:1234567890:client/\$\{iot:Connection.Thing.ThingName\}"}
+\DoxyCodeLine{    \},}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{      "Effect": "Allow",}
+\DoxyCodeLine{      "Action": [}
+\DoxyCodeLine{        "iot:Publish",}
+\DoxyCodeLine{        "iot:Receive"}
+\DoxyCodeLine{      ],}
+\DoxyCodeLine{      "Resource": "arn:aws:iot:us-\/east-\/1:1234567890:topic/\$aws/certificates/*"}
+\DoxyCodeLine{    \},}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{      "Effect": "Allow",}
+\DoxyCodeLine{      "Action": "iot:Subscribe",}
+\DoxyCodeLine{      "Resource": "arn:aws:iot:us-\/east-\/1:1234567890:topicfilter/\$aws/certificates/*"}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{  ]}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md10}{}\doxysubsection{Sample Fleet Provisioning Template}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md10}
+A Fleet Provisioning template is a J\+S\+ON document that uses parameters to describe the resources your device must use to interact with A\+WS IoT. When you use the Fleet Provisioning feature of the Device Client along with a template for your device, it automates the creation of these resources as part of the provisioning process.
+
+You can navigate to the {\itshape A\+WS IoT console -\/$>$ Onboard -\/$>$ Fleet Provisioning} Templates to create a Fleet Provisioning Template.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md11}{}\doxyparagraph{Sample Template}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md11}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{  "Parameters": \{}
+\DoxyCodeLine{    "AWS::IoT::Certificate::Id": \{}
+\DoxyCodeLine{      "Type": "String"}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{  \},}
+\DoxyCodeLine{  "Resources": \{}
+\DoxyCodeLine{    "certificate": \{}
+\DoxyCodeLine{      "Properties": \{}
+\DoxyCodeLine{        "CertificateId": \{}
+\DoxyCodeLine{          "Ref": "AWS::IoT::Certificate::Id"}
+\DoxyCodeLine{        \},}
+\DoxyCodeLine{        "Status": "Active"}
+\DoxyCodeLine{      \},}
+\DoxyCodeLine{      "Type": "AWS::IoT::Certificate"}
+\DoxyCodeLine{    \},}
+\DoxyCodeLine{    "policy": \{}
+\DoxyCodeLine{      "Properties": \{}
+\DoxyCodeLine{        "PolicyName": "FPCertPolicy"}
+\DoxyCodeLine{      \},}
+\DoxyCodeLine{      "Type": "AWS::IoT::Policy"}
+\DoxyCodeLine{    \},}
+\DoxyCodeLine{    "thing": \{}
+\DoxyCodeLine{      "OverrideSettings": \{}
+\DoxyCodeLine{        "AttributePayload": "MERGE",}
+\DoxyCodeLine{        "ThingGroups": "DO\_NOTHING",}
+\DoxyCodeLine{        "ThingTypeName": "REPLACE"}
+\DoxyCodeLine{      \},}
+\DoxyCodeLine{      "Properties": \{}
+\DoxyCodeLine{        "AttributePayload": \{\},}
+\DoxyCodeLine{        "ThingGroups": [],}
+\DoxyCodeLine{        "ThingName": \{}
+\DoxyCodeLine{          "Fn::Join": [}
+\DoxyCodeLine{            "",}
+\DoxyCodeLine{            [}
+\DoxyCodeLine{              "FPTemplateName-\/",}
+\DoxyCodeLine{              \{}
+\DoxyCodeLine{                "Ref": "AWS::IoT::Certificate::Id"}
+\DoxyCodeLine{              \}}
+\DoxyCodeLine{            ]}
+\DoxyCodeLine{          ]}
+\DoxyCodeLine{        \}}
+\DoxyCodeLine{      \},}
+\DoxyCodeLine{      "Type": "AWS::IoT::Thing"}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{  \}}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md12}{}\doxysubsection{Sample Permanent Certificate Policy}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md12}
+Create and attach the permanent certificate policy to the Fleet provisioning template. All new certificates created using your Fleet Provisioning template will have this certificate policy attached to it by default, which will provide the device with the permissions required to invoke other Device Client features such as Jobs, Secure Tunneling, and Device Defender.
+
+You can navigate to the {\itshape A\+WS IoT console -\/$>$ Secure -\/$>$ Policies} to create a permanent certificate policy.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md13}{}\doxyparagraph{Sample (\+F\+P\+Cert\+Policy) Policy}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md13}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{  "Version": "2012-\/10-\/17",}
+\DoxyCodeLine{  "Statement": [}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{      "Effect": "Allow",}
+\DoxyCodeLine{      "Action": "iot:Connect",}
+\DoxyCodeLine{      "Resource": "arn:aws:iot:us-\/east-\/1:1234567890:client/\$\{iot:Connection.Thing.ThingName\}"}
+\DoxyCodeLine{    \},}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{      "Effect": "Allow",}
+\DoxyCodeLine{      "Action": [}
+\DoxyCodeLine{        "iot:Publish",}
+\DoxyCodeLine{        "iot:Receive"}
+\DoxyCodeLine{      ],}
+\DoxyCodeLine{      "Resource": "arn:aws:iot:us-\/east-\/1:1234567890:topic/\$aws/things/\$\{iot:Connection.Thing.ThingName\}/*"}
+\DoxyCodeLine{    \},}
+\DoxyCodeLine{    \{}
+\DoxyCodeLine{      "Effect": "Allow",}
+\DoxyCodeLine{      "Action": "iot:Subscribe",}
+\DoxyCodeLine{      "Resource": "arn:aws:iot:us-\/east-\/1:1234567890:topicfilter/\$aws/things/\$\{iot:Connection.Thing.ThingName\}/*"}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{  ]}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md14}{}\doxysubsection{Fleet Provisioning Runtime Configuration File}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md14}
+Once the device is provisioned correctly, Fleet Provisioning feature will validate and store the information about newly provisioned resources in a runtime config file on your device. This file will be further used by the Device Client while connecting to A\+WS IoT Core.
+
+The information stored in the runtime config file {\bfseries{created by Fleet Provisioning feature}}\+:
+\begin{DoxyItemize}
+\item Thing Name\+: Name of the newly provisioned thing
+\item Certificate\+: Path of the newly created certificate file
+\item Private Key\+: Path of the newly created or device private key file
+\item FP Status\+: A boolean value stating if the Fleet Provision process was completed earlier.
+\end{DoxyItemize}
+
+The runtime-\/config file is stored on your device at {\ttfamily $\sim$/.aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client-\/runtime.\+conf}. If the A\+WS IoT Device Client is restarted in future, it reads the runtime config file, and will use the certificate, private key and thing name mentioned in the runtime config while connecting to A\+WS IoT core {\bfseries{only if the value of \textquotesingle{}completed-\/fp\textquotesingle{} parameter is true}}.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md15}{}\doxyparagraph{Example Fleet Provisioning Runtime Configuration File}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md15}
+Example runtime config created by Fleet Provisioning feature\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{"runtime-\/config": \{}
+\DoxyCodeLine{    "completed-\/fp": true,}
+\DoxyCodeLine{    "cert": "/path/to/newly/created/certificate.pem.crt",}
+\DoxyCodeLine{    "key": "/path/to/private.pem.key",}
+\DoxyCodeLine{    "thing-\/name": "NewlyProvisionedThingName"}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+
+
+{\itshape Note\+: If you wish to re-\/provision your device in the future, then you can either delete or update the runtime config file, setting the \char`\"{}completed-\/fp\char`\"{} parameter to \char`\"{}false\char`\"{} before starting the Device client with Fleet Provisioning feature enabled.}\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md16}{}\doxysubsection{Fleet Provisioning Feature Configuration Options}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md16}
+The Fleet Provisioning feature is disabled by default. You can use the J\+S\+ON config file and/or C\+LI options to enable/disable the feature.
+
+To get started with the feature you will need to set the right configuration. This consists of two required parameters and one optional parameter
+
+{\bfseries{Required Parameters\+:}}
+
+{\ttfamily enabled}\+: Whether or not the Fleet Provisioning feature is enabled (True/\+False).
+
+{\ttfamily template-\/name}\+: The Fleet Provisioning Template name
+
+{\bfseries{Optional Parameter\+:}}
+
+{\ttfamily csr-\/file}\+: Path to the C\+SR file.
+
+{\ttfamily device-\/key}\+: Path to the device private key.
+
+{\itshape Note\+: If the C\+SR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device}\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md17}{}\doxysubsubsection{Configuring the Fleet Provisioning feature via the command line}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md17}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\$ ./aws-\/iot-\/device-\/client -\/-\/enable-\/fleet-\/provisioning [true|false] -\/-\/fleet-\/provisioning-\/template-\/name [Fleet-\/Provisioning-\/Template-\/Name] -\/-\/csr-\/file [your/path/to/csr/file] -\/-\/device-\/key [your/path/to/device/private/key] }
+\end{DoxyCode}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md18}{}\doxysubsubsection{Configuring the Fleet Provisioning feature via the J\+S\+O\+N configuration file}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_fleetprovisioning__r_e_a_d_m_e_autotoc_md18}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{    ...}
+\DoxyCodeLine{    "fleet-\/provisioning": \{}
+\DoxyCodeLine{        "enabled": [true|false],}
+\DoxyCodeLine{        "template-\/name": "Fleet-\/Provisioning-\/Template-\/Name",}
+\DoxyCodeLine{        "csr-\/file": "your/path/to/csr/file",}
+\DoxyCodeLine{        "device-\/key": "your/path/to/device/private/key"}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{    ...}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+
+
+{\itshape Note\+: If the C\+SR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device}
+
+\href{\#fleet-provisioning}{\texttt{ {\itshape Back To The Top}}} 

@@ -1,0 +1,62 @@
+{\bfseries{Notice\+:}} Running the A\+WS IoT Device Client will incur usage of A\+WS IoT services, and is likely to incur charges on your A\+WS account. Please refer the pricing pages for \href{https://aws.amazon.com/iot-core/pricing/}{\texttt{ A\+WS IoT Core}}, \href{https://aws.amazon.com/iot-device-management/pricing/}{\texttt{ A\+WS IoT Device Management}}, and \href{https://aws.amazon.com/iot-device-defender/pricing/}{\texttt{ A\+WS IoT Device Defender}} for more details.
+
+
+\begin{DoxyItemize}
+\item \href{\#logging}{\texttt{ Logging}}
+\begin{DoxyItemize}
+\item \href{\#logging-configuration-options}{\texttt{ Logging Configuration Options}}
+\begin{DoxyItemize}
+\item \href{\#configuring-the-logger-via-the-command-line}{\texttt{ Configuring the logger via the command line}}
+\item \href{\#configuring-sdk-logging-via-the-command-line}{\texttt{ Configuring S\+DK logging via the command line}}
+\item \href{\#configuring-the-logger-via-the-json-configuration-file}{\texttt{ Configuring the logger via the J\+S\+ON configuration file}}
+\item \href{\#configuring-sdk-logging-via-the-json-configuration-file}{\texttt{ Configuring S\+DK logging via the J\+S\+ON configuration file}}
+\end{DoxyItemize}
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+../../\+R\+E\+A\+D\+ME.md \char`\"{}$\ast$\+Back To The Main Readme$\ast$\char`\"{}\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md31}{}\doxysection{Logging}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md31}
+The A\+WS IoT Device Client has the capability to log directly to standard output or write logs to a log file. For either option, the logging level can be specified as either D\+E\+B\+UG, I\+N\+FO, W\+A\+RN, or E\+R\+R\+OR. The logger implementation can be specified as either \char`\"{}\+S\+T\+D\+O\+U\+T\char`\"{} (for standard output) or \char`\"{}\+F\+I\+L\+E\char`\"{} (for logging to a file). If file based logging is specified, you can also specify a file to log to. If a file is not specified, the Device Client will log to the default log location of {\ttfamily /var/log/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client.log}. Keep in mind that the Device Client will need elevated permissions to log to this location, and will automatically fall back to S\+T\+D\+O\+UT logging if the Device Client is unable to log to either the specified or default location.
+
+The A\+WS IoT Device Client also provides the ability to enable native S\+DK logging from the A\+WS Common Runtime (C\+RT). By default, enabling this functionality will log T\+R\+A\+CE level logs and above to {\ttfamily /var/log/aws-\/iot-\/device-\/client/sdk.log} but these defaults can be overridden as show below. If no configuration options are passed, S\+DK logging is disabled by default.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md32}{}\doxysubsection{Logging Configuration Options}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md32}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md33}{}\doxysubsubsection{Configuring the logger via the command line}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md33}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./aws-\/iot-\/device-\/client -\/-\/log-\/level WARN -\/-\/log-\/type FILE -\/-\/log-\/file ./aws-\/iot-\/device-\/client.log}
+\end{DoxyCode}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md34}{}\doxysubsubsection{Configuring S\+D\+K logging via the command line}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md34}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./aws-\/iot-\/device-\/client -\/-\/enable-\/sdk-\/logging -\/-\/sdk-\/log-\/level Warn -\/-\/sdk-\/log-\/file /home/user/my-\/log-\/file.log}
+\end{DoxyCode}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md35}{}\doxysubsubsection{Configuring the logger via the J\+S\+O\+N configuration file}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md35}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{    ...}
+\DoxyCodeLine{    "logging": \{}
+\DoxyCodeLine{        "level": "WARN",}
+\DoxyCodeLine{        "type": "FILE",}
+\DoxyCodeLine{        "file": "./aws-\/iot-\/device-\/client.log"}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{    ...}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+
+
+If you\textquotesingle{}ve decided to add additional logs to the A\+WS IoT Device Client\textquotesingle{}s source code, the high-\/level logging A\+PI macros can be found in {\ttfamily \mbox{\hyperlink{_logger_factory_8h_source}{source/logging/\+Logger\+Factory.\+h}}} and typically follow the convention of {\ttfamily L\+O\+G\+\_\+\+X\+X\+XX} for simple log messages and {\ttfamily L\+O\+G\+M\+\_\+\+X\+X\+XX} for logs that should be formatted with variadic arguments.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md36}{}\doxysubsubsection{Configuring S\+D\+K logging via the J\+S\+O\+N configuration file}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_logging__r_e_a_d_m_e_autotoc_md36}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{        ...}
+\DoxyCodeLine{        "logging": \{}
+\DoxyCodeLine{            ...}
+\DoxyCodeLine{            "enable-\/sdk-\/logging": true,}
+\DoxyCodeLine{            "sdk-\/log-\/level": "Warn",}
+\DoxyCodeLine{            "sdk-\/log-\/file": "/home/user/my-\/log-\/file.log"}
+\DoxyCodeLine{        \}}
+\DoxyCodeLine{        ...}
+\DoxyCodeLine{    \}}
+\end{DoxyCode}
+
+
+\href{\#logging}{\texttt{ {\itshape Back To The Top}}} 

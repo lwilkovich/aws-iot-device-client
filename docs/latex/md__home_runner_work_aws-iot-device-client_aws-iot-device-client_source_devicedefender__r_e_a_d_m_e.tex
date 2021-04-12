@@ -1,0 +1,44 @@
+{\bfseries{Notice\+:}} Running the A\+WS IoT Device Client will incur usage of A\+WS IoT services, and is likely to incur charges on your A\+WS account. Please refer the pricing pages for \href{https://aws.amazon.com/iot-core/pricing/}{\texttt{ A\+WS IoT Core}}, \href{https://aws.amazon.com/iot-device-management/pricing/}{\texttt{ A\+WS IoT Device Management}}, and \href{https://aws.amazon.com/iot-device-defender/pricing/}{\texttt{ A\+WS IoT Device Defender}} for more details.
+
+
+\begin{DoxyItemize}
+\item \href{\#device-defender-feature}{\texttt{ Device Defender Feature}}
+\begin{DoxyItemize}
+\item \href{\#device-defender-feature-configuration-options}{\texttt{ Device Defender Feature Configuration Options}}
+\begin{DoxyItemize}
+\item \href{\#configuring-the-device-defender-feature-via-the-command-line}{\texttt{ Configuring the Device Defender feature via the command line}}
+\item \href{\#configuring-the-device-defender-feature-via-the-json-configuration-file}{\texttt{ Configuring the Device Defender feature via the J\+S\+ON configuration file}}
+\end{DoxyItemize}
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+../../\+R\+E\+A\+D\+ME.md \char`\"{}$\ast$\+Back To The Main Readme$\ast$\char`\"{}\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_devicedefender__r_e_a_d_m_e_autotoc_md1}{}\doxysection{Device Defender Feature}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_devicedefender__r_e_a_d_m_e_autotoc_md1}
+The Device Defender feature within the A\+WS IoT Device Client publishes \href{https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html}{\texttt{ device-\/side metrics}} about the device to the cloud. You can then use the cloud-\/side service to identify unusual behavior that might indicate a compromised device by monitoring the behavior of your devices.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_devicedefender__r_e_a_d_m_e_autotoc_md2}{}\doxysubsection{Device Defender Feature Configuration Options}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_devicedefender__r_e_a_d_m_e_autotoc_md2}
+To get started with the feature you will need to set the right configuration. This consists of two parameters
+
+{\ttfamily enabled}\+: Whether or not the Device Defender feature is enabled (True/\+False).
+
+{\ttfamily device-\/defender-\/interval}\+: Defines the interval in seconds between each cycle of gathering and reporting Device Defender metrics. The client-\/side Device Defender feature gathers your device side metrics and posts them to the Device Defender cloud service.\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_devicedefender__r_e_a_d_m_e_autotoc_md3}{}\doxysubsubsection{Configuring the Device Defender feature via the command line}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_devicedefender__r_e_a_d_m_e_autotoc_md3}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\$ ./aws-\/iot-\/device-\/client -\/-\/enable-\/device-\/defender [true|false] -\/-\/device-\/defender-\/interval 300}
+\end{DoxyCode}
+\hypertarget{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_devicedefender__r_e_a_d_m_e_autotoc_md4}{}\doxysubsubsection{Configuring the Device Defender feature via the J\+S\+O\+N configuration file}\label{md__home_runner_work_aws-iot-device-client_aws-iot-device-client_source_devicedefender__r_e_a_d_m_e_autotoc_md4}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{  ...}
+\DoxyCodeLine{ "device-\/defender": \{}
+\DoxyCodeLine{    "enabled":  true,}
+\DoxyCodeLine{    "interval": 300}
+\DoxyCodeLine{  \}}
+\DoxyCodeLine{  ...}
+\DoxyCodeLine{\}}
+\end{DoxyCode}
+
+
+{\itshape It is important to note the interval\textquotesingle{}s recommended minimum is 300 seconds, anything less than this is subject to being throttled.} Starting the A\+WS IoT Device Client will now start the Device Defender feature. The device will begin publishing reports with all of the available \href{https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html}{\texttt{ device-\/side metrics}} ({\itshape You can see an example report at the bottom of the link}).
+
+The rest of the functionality and interaction with Device Defender will be on the cloud-\/side, where you can create security profiles and alarms to monitor the metrics your device publishes. In order to learn more about the cloud side features, please refer \href{https://docs.aws.amazon.com/iot/latest/developerguide/detect-HowToHowTo.html}{\texttt{ How to use A\+WS IoT Device Defender detect}}.
+
+\href{\#device-defender}{\texttt{ {\itshape Back To The Top}}} 
